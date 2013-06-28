@@ -196,7 +196,7 @@ printf "\nLink Directories...\n"
 
 # Configuration for Apache
 # ln -sf /srv/config/apache2-config/apache2.conf /etc/apache2/apache2.conf | echo "Linked apache2.conf to /etc/apache2/"
-ln -sf /srv/config/apache2-config/apache-wp-common.conf /etc/apache2/apache2-wp-common.conf | echo "Linked apache2-wp-common.conf to /etc/apache2/"
+ln -sf /srv/config/apache2-config/sites/default.conf /etc/apache2/sites-enabled/wp-default.conf | echo "Linked wp-default.conf to /etc/apache2/sites-enabled/"
 
 # Configuration for php5-fpm
 # ln -sf /srv/config/php5-apache2-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo "Linked www.conf to /etc/php5/fpm/pool.d/"
