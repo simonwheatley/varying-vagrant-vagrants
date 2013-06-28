@@ -17,6 +17,7 @@
 
 # No need to share individual site configs with each other
 /config/nginx-config/sites/*.conf
+/config/apache2-config/sites/*.conf
 
 # No need to share our mysql data with each other
 /database/data/*
@@ -32,6 +33,7 @@
 
 # We do have some default nginx configs that should be included
 !/config/nginx-config/sites/default.conf
+!/config/apache2-config/sites/default.conf
 
 # And we do have a default SQL file that should be included
 !/database/init.sql
