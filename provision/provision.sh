@@ -110,9 +110,9 @@ else
 	# the packages that we are installing from non standard sources via
 	# our appended apt source.list
 
-	# Nginx.org nginx key ABF5BD827BD9BF62
-	gpg -q --keyserver keyserver.ubuntu.com --recv-key ABF5BD827BD9BF62
-	gpg -q -a --export ABF5BD827BD9BF62 | apt-key add -
+	# # Nginx.org nginx key ABF5BD827BD9BF62
+	# gpg -q --keyserver keyserver.ubuntu.com --recv-key ABF5BD827BD9BF62
+	# gpg -q -a --export ABF5BD827BD9BF62 | apt-key add -
 
 	# Launchpad Subversion key EAA903E3A2F4C039
 	gpg -q --keyserver keyserver.ubuntu.com --recv-key EAA903E3A2F4C039
