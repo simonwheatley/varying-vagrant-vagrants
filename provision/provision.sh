@@ -22,12 +22,12 @@ apt_package_install_list=()
 # individual status before passing to the apt_package_install_list array.
 apt_package_check_list=(
 
-	# PHP5
-	#
-	# Our base packages for php5. As long as php5-fpm and php5-cli are
-	# installed, there is no need to install the general php5 package, which
-	# can sometimes install apache as a requirement.
-	php5-fpm
+	# Apache is installed as the default web server
+	apache2
+	libapache2-mod-php5
+
+	# Our base packages for php5
+	php5
 	php5-cli
 
 	# Common and dev packages for php
@@ -45,9 +45,6 @@ apt_package_check_list=(
 	php-pear
 	php5-gd
 	php-apc
-
-	# nginx is installed as the default web server
-	nginx
 
 	# memcached is made available for object caching
 	memcached
@@ -197,22 +194,22 @@ fi
 # SYMLINK HOST FILES
 printf "\nLink Directories...\n"
 
-# Configuration for nginx
-ln -sf /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf | echo "Linked nginx.conf to /etc/nginx/"
-ln -sf /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf | echo "Linked nginx-wp-common.conf to /etc/nginx/"
+# Configuration for Apache
+# ln -sf /srv/config/apache2-config/apache2.conf /etc/apache2/apache2.conf | echo "Linked apache2.conf to /etc/apache2/"
+ln -sf /srv/config/apache2-config/apache-wp-common.conf /etc/apache2/apache2-wp-common.conf | echo "Linked apache2-wp-common.conf to /etc/apache2/"
 
 # Configuration for php5-fpm
-ln -sf /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo "Linked www.conf to /etc/php5/fpm/pool.d/"
+# ln -sf /srv/config/php5-apache2-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo "Linked www.conf to /etc/php5/fpm/pool.d/"
 
 # Provide additional directives for PHP in a custom ini file
-ln -sf /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini | echo "Linked php-custom.ini to /etc/php5/fpm/conf.d/php-custom.ini"
+# ln -sf /srv/config/php5-apache2-config/php-custom.ini /etc/php5/apache2/conf.d/php-custom.ini | echo "Linked php-custom.ini to /etc/php5/fpm/conf.d/php-custom.ini"
 
 # Configuration for Xdebug - Mod disabled by default
 php5dismod xdebug
-ln -sf /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini | echo "Linked xdebug.ini to /etc/php5/fpm/conf.d/xdebug.ini"
+ln -sf /srv/config/php5-apache2-config/xdebug.ini /etc/php5/apache2/conf.d/xdebug.ini | echo "Linked xdebug.ini to /etc/php5/fpm/conf.d/xdebug.ini"
 
 # Configuration for APC
-ln -sf /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini | echo "Linked apc.ini to /etc/php5/fpm/conf.d/"
+ln -sf /srv/config/php5-apache2-config/apc.ini /etc/php5/apache2/conf.d/apc.ini | echo "Linked apc.ini to /etc/php5/fpm/conf.d/"
 
 # Configuration for mysql
 cp /srv/config/mysql-config/my.cnf /etc/mysql/my.cnf | echo "Linked my.cnf to /etc/mysql/"
@@ -234,9 +231,7 @@ ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo "Linked vim configuration t
 # Make sure the services we expect to be running are running.
 printf "\nRestart services...\n"
 printf "service nginx restart\n"
-service nginx restart
-printf "service php5-fpm restart\n"
-service php5-fpm restart
+service apache2 restart
 printf "service memcached restart\n"
 service memcached restart
 
