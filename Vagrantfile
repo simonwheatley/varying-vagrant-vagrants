@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# FYI when you run this at the same time as the Nginx there's a port forwarding 
+# collision for 2222, which is changed to 2200… seeing as Vagrant resolves the 
+# issue, I've not changed it in the config. :)
+
 dir = Dir.pwd
 
 Vagrant.configure("2") do |config|
