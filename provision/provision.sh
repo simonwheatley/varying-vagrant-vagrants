@@ -196,14 +196,16 @@ printf "\nLink Directories...\n"
 
 # Configuration for Apache
 # ln -sf /srv/config/apache2-config/apache2.conf /etc/apache2/apache2.conf | echo "Linked apache2.conf to /etc/apache2/"
+# Default sites
 ln -sf /srv/config/apache2-config/sites/default.conf /etc/apache2/sites-enabled/wp-default.conf | echo "Linked wp-default.conf to /etc/apache2/sites-enabled/"
+# Mod Rewrite
 a2enmod rewrite
 
 # Configuration for php5-fpm
 # ln -sf /srv/config/php5-apache2-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo "Linked www.conf to /etc/php5/fpm/pool.d/"
 
 # Provide additional directives for PHP in a custom ini file
-# ln -sf /srv/config/php5-apache2-config/php-custom.ini /etc/php5/apache2/conf.d/php-custom.ini | echo "Linked php-custom.ini to /etc/php5/fpm/conf.d/php-custom.ini"
+ln -sf /srv/config/php5-apache2-config/php-custom.ini /etc/php5/apache2/conf.d/php-custom.ini | echo "Linked php-custom.ini to /etc/php5/fpm/conf.d/php-custom.ini"
 
 # Configuration for Xdebug - Mod disabled by default
 php5dismod xdebug
