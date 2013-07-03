@@ -10,16 +10,13 @@ Vagrant.configure("2") do |config|
 	  # Configurations from 1.0.x can be placed in Vagrant 1.1.x specs like the following.
 	  apache.vm.provider :virtualbox do |v|
 		v.customize ["modifyvm", :id, "--memory", 512]
-		v.name = "default-apache"
 	  end
 
-	  # apache.vm.define = "default-apache"
-	  
 	  # Default Ubuntu Box
 	  #
 	  # This box is provided by Vagrant at vagrantup.com and is a nicely sized (290MB)
 	  # box containing the Unbuntu 12.0.4 Precise 32 bit release.
-	  apache.vm.box = "std-precise32-apache"
+	  apache.vm.box = "std-precise32"
 	  apache.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
 	  apache.vm.hostname = "precise32-apache-dev"
