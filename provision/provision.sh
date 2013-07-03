@@ -233,7 +233,7 @@ ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo "Linked vim configuration t
 #
 # Make sure the services we expect to be running are running.
 printf "\nRestart services...\n"
-printf "service nginx restart\n"
+printf "service apache2 restart\n"
 service apache2 restart
 printf "service memcached restart\n"
 service memcached restart
