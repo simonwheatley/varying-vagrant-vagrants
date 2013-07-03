@@ -17,8 +17,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "std-precise32"
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
-  config.vm.hostname = "precise32-dev"
-  config.vm.network :private_network, ip: "192.168.50.4"
+  config.vm.hostname = "precise32-apache-dev"
+  config.vm.network :private_network, ip: "192.168.50.5"
  
   # Drive mapping
   #
