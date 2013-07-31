@@ -4,7 +4,7 @@ Varying Vagrant Vagrants is an evolving [Vagrant](http://vagrantup.com) configur
 
 * **Version**: 0.9-working
 * **Latest Stable**: [v0.8](https://github.com/10up/varying-vagrant-vagrants/tree/v0.8)
-* **Contributors**: [@jeremyfelt](http://github.com/jeremyfelt), [@carldanley](http://github.com/carldanley), [@ericmann](http://github.com/ericmann), [@lkwdwrd](http://github.com/lkwdwrd), [@TheLastCicada](http://github.com/TheLastCicada), [@tddewey](http://github.com/tddewey), [@johnpbloch](http://github.com/johnpbloch), [@kadamwhite](http://github.com/kadamwhite), [@scribu](http://github.com/scribu), [@danielbachhuber](http://github.com/danielbachhuber), [@tollmanz](http://github.com/tollmanz), [@mbijon](http://github.com/mbijon), [@markjaquith](http://github.com/markjaquith), [@curtismchale](http://github.com/curtismchale), [@Mamaduka](http://github.com/mamaduka), [@lgedeon](http://github.com/lgedeon), [@pmgarman](http://github.com/pmgarman)
+* **Contributors**: [@jeremyfelt](http://github.com/jeremyfelt), [@carldanley](http://github.com/carldanley), [@ericmann](http://github.com/ericmann), [@lkwdwrd](http://github.com/lkwdwrd), [@TheLastCicada](http://github.com/TheLastCicada), [@tddewey](http://github.com/tddewey), [@johnpbloch](http://github.com/johnpbloch), [@kadamwhite](http://github.com/kadamwhite), [@scribu](http://github.com/scribu), [@danielbachhuber](http://github.com/danielbachhuber), [@tollmanz](http://github.com/tollmanz), [@mbijon](http://github.com/mbijon), [@markjaquith](http://github.com/markjaquith), [@curtismchale](http://github.com/curtismchale), [@Mamaduka](http://github.com/mamaduka), [@lgedeon](http://github.com/lgedeon), [@pmgarman](http://github.com/pmgarman), [@westonruter](http://github.com/westonruter), [@petemall](http://github.com/petemall)
 * **Contributing**: Contributions are more than welcome. Please submit pull requests against the [master branch](https://github.com/10up/varying-vagrant-vagrants/). Thanks!
 
 ## Overview
@@ -53,7 +53,7 @@ Immediate goals for VVV include:
 1. Start with any operating system.
 1. Install [VirtualBox 4.2.16](https://www.virtualbox.org/wiki/Downloads)
     * VVV (and Vagrant) has been tested with this version. If a newer version appears on the downloads page and you don't feel like being a guinea pig, check out the [older downloads](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) page and download the 4.2.16 release.
-1. Install [Vagrant 1.2.3](http://downloads.vagrantup.com/tags/v1.2.3)
+1. Install [Vagrant 1.2.5](http://downloads.vagrantup.com/tags/v1.2.5)
     * `vagrant` will now be available as a command in the terminal, try it out.
 1. Clone the Varying Vagrant Vagrants repository into a local directory
     * `git clone git://github.com/10up/varying-vagrant-vagrants.git vagrant-local`
@@ -130,15 +130,15 @@ Now that you're up and running with a default configuration, start poking around
 A bunch of stuff!
 
 1. [Ubuntu](http://ubuntu.com) 12.04 LTS (Precise Pangolin)
-1. [nginx](http://nginx.org) 1.4.1
+1. [nginx](http://nginx.org) 1.4.2
 1. [mysql](http://mysql.com) 5.5.31
-1. [php-fpm](http://php-fpm.org) 5.4.15
+1. [php-fpm](http://php-fpm.org) 5.4.17
 1. [memcached](http://memcached.org/) 1.4.13
 1. PHP [memcache extension](http://pecl.php.net/package/memcache/3.0.6) 3.0.6
 1. [xdebug](http://xdebug.org/) 2.2.1
 1. [PHPUnit](http://pear.phpunit.de/) 3.7.21
 1. [ack-grep](http://beyondgrep.com/) 2.04
-1. [git](http://git-scm.com) 1.8.3
+1. [git](http://git-scm.com) 1.8.3.4
 1. [subversion](http://subversion.apache.org/) 1.7.9
 1. [ngrep](http://ngrep.sourceforge.net/usage.html)
 1. [dos2unix](http://dos2unix.sourceforge.net/)

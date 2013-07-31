@@ -9,10 +9,20 @@
 # end of this script.
 start_seconds=`date +%s`
 
-# Capture a basic ping result to one of Google's DNS servers to try and
-# determine if outside access is available to us. If it isn't, we'll
-# want to skip a few things in the future rather than creating a bunch of errors.
-ping_result=`ping -c 2 8.8.8.8 2>&1`
+# Capture a basic ping result to Google's primary DNS server to determine if
+# outside access is available to us. If this does not reply after 2 attempts,
+# we try one of Level3's DNS servers as well. If neither of these IPs replies to
+# a ping, then we'll skip a few things further in provisioning rather than
+# creating a bunch of errors.
+ping_result=`ping -c 2 8.8.4.4 2>&1`
+if [[ $ping_result != *bytes?from* ]]
+then
+	ping_result=`ping -c 2 4.2.2.2 2>&1`
+fi
+
+# Capture the current IP address of the virtual machine into a variable that
+# can be used when necessary throughout provisioning.
+vvv_ip=`ifconfig eth1 | ack "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1`
 
 # PACKAGE INSTALLATION
 #
@@ -58,6 +68,9 @@ apt_package_check_list=(
 	# memcached is made available for object caching
 	memcached
 
+	# mysql is the default database
+	mysql-server
+
 	# other packages that come in handy
 	imagemagick
 	subversion
@@ -67,6 +80,7 @@ apt_package_check_list=(
 	curl
 	make
 	vim
+	colordiff
 
 	# dos2unix
 	# Allows conversion of DOS style line endings to something we'll have less
@@ -74,38 +88,33 @@ apt_package_check_list=(
 	dos2unix
 )
 
-echo "Check for packages to install..."
+echo "Check for apt packages to install..."
 
 # Loop through each of our packages that should be installed on the system. If
 # not yet installed, it should be added to the array of packages to install.
 for pkg in "${apt_package_check_list[@]}"
 do
-	if dpkg -s $pkg 2>&1 | grep -q 'Status: install ok installed';
+	package_version=`dpkg -s $pkg 2>&1 | grep 'Version:' | cut -d " " -f 2`
+	if [[ $package_version != "" ]]
 	then 
-		echo "  * " $pkg already installed
+		space_count=`expr 20 - "${#pkg}"` #11
+		pack_space_count=`expr 30 - "${#package_version}"`
+		real_space=`expr ${space_count} + ${pack_space_count} + ${#package_version}`
+		printf " * $pkg %${real_space}.${#package_version}s" $package_version
 	else
-		echo "  * " $pkg not yet installed
+		echo " *" $pkg [not installed]
 		apt_package_install_list+=($pkg)
 	fi
 done
 
 # MySQL
 #
-# The current state of MySQL should be done outside of the looping done above.
-# This allows us to set the MySQL specific settings for the root password
-# so that provisioning does not require any user input.
-if dpkg -s mysql-server | grep -q 'Status: install ok installed';
-then
-	echo "  * mysql-server already installed"
-else 
-	echo "  * mysql-server not yet installed"
-	# We need to set the selections to automatically fill the password prompt
-	# for mysql while it is being installed. The password in the following two
-	# lines *is* actually set to the word 'blank' for the root user.
-	echo mysql-server mysql-server/root_password password blank | debconf-set-selections
-	echo mysql-server mysql-server/root_password_again password blank | debconf-set-selections
-	apt_package_install_list+=('mysql-server')
-fi
+# Use debconf-set-selections to specify the default password for the root MySQL
+# account. This runs on every provision, even if MySQL has been installed. If
+# MySQL is already installed, it will not affect anything. The password in the
+# following two lines *is* actually set to the word 'blank' for the root user.
+echo mysql-server mysql-server/root_password password blank | debconf-set-selections
+echo mysql-server mysql-server/root_password_again password blank | debconf-set-selections
 
 # Provide our custom apt sources before running `apt-get update`
 ln -sf /srv/config/apt-source-append.list /etc/apt/sources.list.d/vvv-sources.list | echo "Linked custom apt sources"
@@ -116,7 +125,7 @@ then
 	# then we'll run `apt-get update` and then `apt-get install` to proceed.
 	if [ ${#apt_package_install_list[@]} = 0 ];
 	then 
-		printf "No packages to install.\n\n"
+		printf "No apt packages to install.\n\n"
 	else
 		# Before running `apt-get update`, we should add the public keys for
 		# the packages that we are installing from non standard sources via
@@ -190,8 +199,8 @@ then
 		sh -c "cd /usr/local/src/vvv-phpunit && composer install"
 	else
 		cd /usr/local/src/vvv-phpunit
-		if composer show -i | grep -q 'mockery'; then echo 'Mockery installed';else vvvphpunit_update=1;fi
-		if composer show -i | grep -q 'phpunit'; then echo 'PHPUnit installed'; else vvvphpunit_update=1;fi
+		if composer show -i | grep -q 'mockery' ; then echo 'Mockery installed' ; else vvvphpunit_update=1;fi
+		if composer show -i | grep -q 'phpunit' ; then echo 'PHPUnit installed' ; else vvvphpunit_update=1;fi
 		if composer show -i | grep -q 'hamcrest'; then echo 'Hamcrest installed'; else vvvphpunit_update=1;fi
 		cd ~/
 	fi
@@ -206,40 +215,54 @@ else
 	printf "\nNo network connection available, skipping package installation"
 fi
 
-# SYMLINK HOST FILES
-printf "\nLink Directories...\n"
-
 # Configuration for nginx
-ln -sf /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf | echo "Linked nginx.conf to /etc/nginx/"
-ln -sf /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf | echo "Linked nginx-wp-common.conf to /etc/nginx/"
+if [ ! -e /etc/nginx/server.key ]; then
+	echo "Generate Nginx server private key..."
+	vvvgenrsa=`openssl genrsa -out /etc/nginx/server.key 2048 2>&1`
+	echo $vvvgenrsa
+fi
+if [ ! -e /etc/nginx/server.csr ]; then
+	echo "Generate Certificate Signing Request (CSR)..."
+	openssl req -new -batch -key /etc/nginx/server.key -out /etc/nginx/server.csr
+fi
+if [ ! -e /etc/nginx/server.crt ]; then
+	echo "Sign the certificate using the above private key and CSR..."
+	vvvsigncert=`openssl x509 -req -days 365 -in /etc/nginx/server.csr -signkey /etc/nginx/server.key -out /etc/nginx/server.crt 2>&1`
+	echo $vvvsigncert
+fi
+
+# SYMLINK HOST FILES
+printf "\nSetup configuration file links...\n"
+
+ln -sf /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf | echo " * /srv/config/nginx-config/nginx.conf -> /etc/nginx/nginx.conf"
+ln -sf /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf | echo " * /srv/config/nginx-config/nginx-wp-common.conf -> /etc/nginx/nginx-wp-common.conf"
 
 # Configuration for php5-fpm
-ln -sf /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo "Linked www.conf to /etc/php5/fpm/pool.d/"
+ln -sf /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo " * /srv/config/php5-fpm-config/www.conf -> /etc/php5/fpm/pool.d/www.conf"
 
 # Provide additional directives for PHP in a custom ini file
-ln -sf /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini | echo "Linked php-custom.ini to /etc/php5/fpm/conf.d/php-custom.ini"
+ln -sf /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini | echo " * /srv/config/php5-fpm-config/php-custom.ini -> /etc/php5/fpm/conf.d/php-custom.ini"
 
-# Configuration for Xdebug - Mod disabled by default
-php5dismod xdebug
-ln -sf /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini | echo "Linked xdebug.ini to /etc/php5/fpm/conf.d/xdebug.ini"
+# Configuration for Xdebug
+ln -sf /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini | echo " * /srv/config/php5-fpm-config/xdebug.ini -> /etc/php5/fpm/conf.d/xdebug.ini"
 
 # Configuration for APC
-ln -sf /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini | echo "Linked apc.ini to /etc/php5/fpm/conf.d/"
+ln -sf /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini | echo " * /srv/config/php5-fpm-config/apc.ini -> /etc/php5/fpm/conf.d/apc.ini"
 
 # Configuration for mysql
-cp /srv/config/mysql-config/my.cnf /etc/mysql/my.cnf | echo "Linked my.cnf to /etc/mysql/"
+cp /srv/config/mysql-config/my.cnf /etc/mysql/my.cnf | echo " * /srv/config/mysql-config/my.cnf -> /etc/mysql/my.cnf"
 
 # Configuration for memcached
-ln -sf /srv/config/memcached-config/memcached.conf /etc/memcached.conf | echo "Linked memcached.conf to /etc/"
+ln -sf /srv/config/memcached-config/memcached.conf /etc/memcached.conf | echo " * /srv/config/memcached-config/memcached.conf -> /etc/memcached.conf"
 
 # Custom bash_profile for our vagrant user
-ln -sf /srv/config/bash_profile /home/vagrant/.bash_profile | echo "Linked .bash_profile to vagrant user's home directory..."
+ln -sf /srv/config/bash_profile /home/vagrant/.bash_profile | echo " * /srv/config/bash_profile -> /home/vagrant/.bash_profile"
 
 # Custom bash_aliases included by vagrant user's .bashrc
-ln -sf /srv/config/bash_aliases /home/vagrant/.bash_aliases | echo "Linked .bash_aliases to vagrant user's home directory..."
+ln -sf /srv/config/bash_aliases /home/vagrant/.bash_aliases | echo " * /srv/config/bash_aleases -> /home/vagrant/.bash_aliases"
 
 # Custom vim configuration via .vimrc
-ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo "Linked vim configuration to home directory..."
+ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo " * /srv/config/vimrc -> /home/vagrant/.vimrc"
 
 # RESTART SERVICES
 #
@@ -248,6 +271,9 @@ printf "\nRestart services...\n"
 service nginx restart
 service php5-fpm restart
 service memcached restart
+
+# Disable PHP Xdebug module by default
+php5dismod xdebug
 
 # MySQL gives us an error if we restart a non running service, which
 # happens after a `vagrant halt`. Check to see if it's running before
@@ -314,7 +340,9 @@ define( "WP_DEBUG", true );
 PHP
 		wp core install --url=local.wordpress.dev --quiet --title="Local WordPress Dev" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
 	else
-		printf "Skip WordPress installation, already available\n"
+		printf "Updating WordPress stable...\n"
+		cd /srv/www/wordpress-default
+		wp core upgrade
 	fi
 
 	# Checkout, install and configure WordPress trunk
@@ -335,14 +363,16 @@ PHP
 	fi
 
 	# Checkout and configure the WordPress unit tests
-	if [ ! -f /home/vagrant/flags/disable_wp_tests ]
+	if [ ! -d /srv/www/wordpress-unit-tests ]
 	then
-		if [ ! -d /srv/www/wordpress-unit-tests ]
+		printf "Downloading WordPress Unit Tests.....https://unit-tests.svn.wordpress.org\n"
+		# Must be in a WP directory to run wp
+		cd /srv/www/wordpress-trunk
+		wp core init-tests /srv/www/wordpress-unit-tests --dbname=wordpress_unit_tests --dbuser=wp --dbpass=wp
+	else
+		if [ ! -d /srv/www/wordpress-unit-tests/.svn ]
 		then
-			printf "Downloading WordPress Unit Tests.....https://unit-tests.svn.wordpress.org\n"
-			# Must be in a WP directory to run wp
-			cd /srv/www/wordpress-trunk
-			wp core init-tests /srv/www/wordpress-unit-tests --dbname=wordpress_unit_tests --dbuser=wp --dbpass=wp
+			printf "Skipping WordPress unit tests...\n"
 		else
 			printf "Updating WordPress unit tests...\n"	
 			cd /srv/www/wordpress-unit-tests
@@ -381,4 +411,4 @@ then
 else
 	echo No external network available. Package installation and maintenance skipped.
 fi
-echo For further setup instructions, visit http://192.168.50.4
+echo For further setup instructions, visit http://$vvv_ip
