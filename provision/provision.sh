@@ -20,10 +20,6 @@ then
 	ping_result=`ping -c 2 4.2.2.2 2>&1`
 fi
 
-# Capture the current IP address of the virtual machine into a variable that
-# can be used when necessary throughout provisioning.
-vvv_ip=`ifconfig eth1 | ack "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1`
-
 # PACKAGE INSTALLATION
 #
 # Build a bash array to pass all of the packages we want to install to a single
@@ -82,10 +78,18 @@ apt_package_check_list=(
 	vim
 	colordiff
 
+	# Req'd for Webgrind
+	graphviz
+
 	# dos2unix
 	# Allows conversion of DOS style line endings to something we'll have less
 	# trouble with in Linux.
 	dos2unix
+
+	# nodejs for use by grunt
+	g++
+	nodejs
+
 )
 
 echo "Check for apt packages to install..."
@@ -96,11 +100,11 @@ for pkg in "${apt_package_check_list[@]}"
 do
 	package_version=`dpkg -s $pkg 2>&1 | grep 'Version:' | cut -d " " -f 2`
 	if [[ $package_version != "" ]]
-	then 
+	then
 		space_count=`expr 20 - "${#pkg}"` #11
 		pack_space_count=`expr 30 - "${#package_version}"`
 		real_space=`expr ${space_count} + ${pack_space_count} + ${#package_version}`
-		printf " * $pkg %${real_space}.${#package_version}s" $package_version
+		printf " * $pkg %${real_space}.${#package_version}s ${package_version}\n"
 	else
 		echo " *" $pkg [not installed]
 		apt_package_install_list+=($pkg)
@@ -124,7 +128,7 @@ then
 	# If there are any packages to be installed in the apt_package_list array,
 	# then we'll run `apt-get update` and then `apt-get install` to proceed.
 	if [ ${#apt_package_install_list[@]} = 0 ];
-	then 
+	then
 		printf "No apt packages to install.\n\n"
 	else
 		# Before running `apt-get update`, we should add the public keys for
@@ -147,6 +151,10 @@ then
 		gpg -q --keyserver keyserver.ubuntu.com --recv-key A1715D88E1DF1F24
 		gpg -q -a --export A1715D88E1DF1F24 | apt-key add -
 
+		# Launchpad nodejs key C7917B12 
+		gpg -q --keyserver keyserver.ubuntu.com --recv-key C7917B12 
+		gpg -q -a --export  C7917B12  | apt-key add -
+
 		# update all of the package references before installing anything
 		printf "Running apt-get update....\n"
 		apt-get update --assume-yes
@@ -156,7 +164,7 @@ then
 		apt-get install --assume-yes ${apt_package_install_list[@]}
 
 		# Clean up apt caches
-		apt-get clean			
+		apt-get clean
 	fi
 
 	# ack-grep
@@ -211,6 +219,20 @@ then
 		cp /srv/config/phpunit-composer.json /usr/local/src/vvv-phpunit/composer.json
 		sh -c "cd /usr/local/src/vvv-phpunit && composer update"
 	fi
+
+	# Grunt
+	#
+	# Install or Update Grunt based on gurrent state.  Updates are direct
+	# from NPM
+	if [ ! -d /usr/lib/node_modules/grunt-cli  ]
+	then
+		printf "Installing Grunt CLI\n"
+		npm install -g grunt-cli
+	else
+		printf "Updating Grunt CLI\n"
+		npm update -g grunt-cli
+	fi
+
 else
 	printf "\nNo network connection available, skipping package installation"
 fi
@@ -261,8 +283,15 @@ ln -sf /srv/config/bash_profile /home/vagrant/.bash_profile | echo " * /srv/conf
 # Custom bash_aliases included by vagrant user's .bashrc
 ln -sf /srv/config/bash_aliases /home/vagrant/.bash_aliases | echo " * /srv/config/bash_aleases -> /home/vagrant/.bash_aliases"
 
+# Custom home bin directory
+ln -nsf /srv/config/homebin /home/vagrant/bin | echo " * /srv/config/homebin -> /home/vagrant/bin"
+
 # Custom vim configuration via .vimrc
 ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo " * /srv/config/vimrc -> /home/vagrant/.vimrc"
+
+# Capture the current IP address of the virtual machine into a variable that
+# can be used when necessary throughout provisioning.
+vvv_ip=`ifconfig eth1 | ack "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1`
 
 # RESTART SERVICES
 #
@@ -303,7 +332,7 @@ fi
 # users and databases that our vagrant setup relies on.
 mysql -u root -pblank < /srv/database/init.sql | echo "Initial MySQL prep...."
 
-# Process each mysqldump SQL file in database/backups to import 
+# Process each mysqldump SQL file in database/backups to import
 # an initial data set for MySQL.
 /srv/database/import-sql.sh
 
@@ -320,9 +349,25 @@ then
 		printf "\nUpdating wp-cli....\n"
 		cd /srv/www/wp-cli
 		git pull --rebase origin master
+		composer update
 	fi
 	# Link `wp` to the `/usr/local/bin` directory
 	ln -sf /srv/www/wp-cli/bin/wp /usr/local/bin/wp
+
+	# Webgrind install (for viewing callgrind/cachegrind files produced by
+	# xdebug profiler)
+	if [ ! -d /srv/www/default/webgrind ]
+	then
+		printf "\nDownloading webgrind.....https://github.com/jokkedk/webgrind\n"
+		git clone git://github.com/jokkedk/webgrind.git /srv/www/default/webgrind
+
+		printf "\nLinking webgrind config file...\n"
+		ln -sf /srv/config/webgrind-config.php /srv/www/default/webgrind/config.php | echo " * /srv/config/webgrind-config.php -> /srv/www/default/webgrind/config.php"
+	else
+		printf "\nUpdating webgrind....\n"
+		cd /srv/www/default/webgrind
+		git pull --rebase origin master
+	fi
 
 	# Install and configure the latest stable version of WordPress
 	if [ ! -d /srv/www/wordpress-default ]
@@ -345,10 +390,10 @@ PHP
 		wp core upgrade
 	fi
 
-	# Checkout, install and configure WordPress trunk
+	# Checkout, install and configure WordPress trunk via core.svn
 	if [ ! -d /srv/www/wordpress-trunk ]
 	then
-		printf "Checking out WordPress trunk....http://core.svn.wordpress.org/trunk\n"
+		printf "Checking out WordPress trunk from core.svn....http://core.svn.wordpress.org/trunk\n"
 		svn checkout http://core.svn.wordpress.org/trunk/ /srv/www/wordpress-trunk
 		cd /srv/www/wordpress-trunk
 		printf "Configuring WordPress trunk...\n"
@@ -362,22 +407,30 @@ PHP
 		svn up --ignore-externals
 	fi
 
-	# Checkout and configure the WordPress unit tests
-	if [ ! -d /srv/www/wordpress-unit-tests ]
+	# Checkout, install and configure WordPress trunk via develop.svn
+	if [ ! -d /srv/www/wordpress-develop ]
 	then
-		printf "Downloading WordPress Unit Tests.....https://unit-tests.svn.wordpress.org\n"
-		# Must be in a WP directory to run wp
-		cd /srv/www/wordpress-trunk
-		wp core init-tests /srv/www/wordpress-unit-tests --dbname=wordpress_unit_tests --dbuser=wp --dbpass=wp
+		printf "Checking out WordPress trunk from develop.svn....http://develop.svn.wordpress.org/trunk\n"
+		svn checkout http://develop.svn.wordpress.org/trunk/ /srv/www/wordpress-develop
+		cd /srv/www/wordpress-develop/src/
+		printf "Configuring WordPress develop...\n"
+		wp core config --dbname=wordpress_develop --dbuser=wp --dbpass=wp --quiet --extra-php <<PHP
+define( "WP_DEBUG", true );
+PHP
+		wp core install --url=src.wordpress-develop.dev --quiet --title="WordPress Develop" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
+		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/tests/
 	else
-		if [ ! -d /srv/www/wordpress-unit-tests/.svn ]
-		then
-			printf "Skipping WordPress unit tests...\n"
-		else
-			printf "Updating WordPress unit tests...\n"	
-			cd /srv/www/wordpress-unit-tests
-			svn up --ignore-externals
-		fi
+		printf "Updating WordPress trunk...\n"
+		cd /srv/www/wordpress-develop/
+		svn up
+	fi
+
+	if [ ! -d /srv/www/wordpress-develop/build ]
+	then
+		printf "Initializing grunt in WordPress develop...\n"
+		cd /srv/www/wordpress-develop/
+		npm install
+		grunt
 	fi
 
 	# Download phpMyAdmin 4.0.3
@@ -397,7 +450,7 @@ else
 fi
 # Add any custom domains to the virtual machine's hosts file so that it
 # is self aware. Enter domains space delimited as shown with the default.
-DOMAINS='local.wordpress.dev local.wordpress-trunk.dev'
+DOMAINS='local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev'
 if ! grep -q "$DOMAINS" /etc/hosts
 then echo "127.0.0.1 $DOMAINS" >> /etc/hosts
 fi
