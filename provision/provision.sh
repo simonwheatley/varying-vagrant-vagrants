@@ -195,7 +195,13 @@ fi
 printf "\nLink Directories...\n"
 
 # Configuration for Apache
-# ln -sf /srv/config/apache2-config/apache2.conf /etc/apache2/apache2.conf | echo "Linked apache2.conf to /etc/apache2/"
+# Ensure we have a conf.d directory
+if [ ! -d /etc/apache2/conf.d ]
+then
+	mkdir -p /etc/apache2/conf.d
+fi
+# Link our Apache config stuff in
+ln -sf /srv/config/apache2-config/apache2.conf /etc/apache2/conf-enabled/vvv.conf | echo "Linked apache2.conf to /etc/apache2/conf-enabled/vvv.conf"
 # Default sites
 ln -sf /srv/config/apache2-config/sites/default.conf /etc/apache2/sites-enabled/wp-default.conf | echo "Linked wp-default.conf to /etc/apache2/sites-enabled/"
 # Mod Rewrite
