@@ -2,6 +2,7 @@
 # vi: set ft=ruby :
 
 dir = Dir.pwd
+vagrant_dir = File.expand_path(File.dirname(__FILE__))
 
 Vagrant.configure("2") do |config|
 
@@ -15,7 +16,12 @@ Vagrant.configure("2") do |config|
   # Enable agent forwarding on vagrant ssh commands. This allows you to use identities
   # established on the host machine inside the guest. See the manual for ssh-add
   config.ssh.forward_agent = true
-  
+
+  # SSH timeout
+  #
+  # Bump up the default time to wait when attempting a single connection via SSH from 30
+  config.ssh.timeout = 80
+
   # Default Ubuntu Box
   #
   # This box is provided by Vagrant at vagrantup.com and is a nicely sized (290MB)
@@ -25,6 +31,24 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
   config.vm.hostname = "vvv"
+
+  # Local Machine Hosts
+  #
+  # If the Vagrant plugin hostsupdater (https://github.com/cogitatio/vagrant-hostsupdater) is
+  # installed, the following will automatically configure your local machine's hosts file to
+  # be aware of the domains specified below. Watch the provisioning script as you may be
+  # required to enter a password for Vagrant to access your hosts file.
+  #
+  # By default, we'll include the domains setup by VVV. A short term goal is to read these in
+  # from a local config file so that they can be more dynamic to your setup.
+  if defined? VagrantPlugins::HostsUpdater
+    config.hostsupdater.aliases = [
+      "local.wordpress.dev",
+      "local.wordpress-trunk.dev",
+      "src.wordpress-develop.dev",
+      "build.wordpress-develop.dev"
+    ]
+  end
 
   # Default Box IP Address
   #
@@ -96,7 +120,7 @@ Vagrant.configure("2") do |config|
   # provison-pre.sh acts as a pre-hook to our default provisioning script. Anything that
   # should run before the shell commands laid out in provision.sh (or your provision-custom.sh 
   # file) should go in this script. If it does not exist, no extra provisioning will run.
-  if File.exists?('provision/provision-pre.sh') then
+  if File.exists?(File.join(vagrant_dir,'provision','provision-pre.sh')) then
     config.vm.provision :shell, :path => File.join( "provision", "provision-pre.sh" )
   end
 
@@ -106,7 +130,7 @@ Vagrant.configure("2") do |config|
   # provision directory. If it is detected that a provision-custom.sh script has been
   # created, that is run as a replacement. This is an opportunity to replace the entirety
   # of the provisioning provided by default.
-  if File.exists?('provision/provision-custom.sh') then
+  if File.exists?(File.join(vagrant_dir,'provision','provision-custom.sh')) then
     config.vm.provision :shell, :path => File.join( "provision", "provision-custom.sh" )
   else
     config.vm.provision :shell, :path => File.join( "provision", "provision.sh" )
@@ -116,7 +140,7 @@ Vagrant.configure("2") do |config|
   # run after the shell commands laid out in provision.sh or provision-custom.sh should be
   # put into this file. This provides a good opportunity to install additional packages
   # without having to replace the entire default provisioning script.
-  if File.exists?('provision/provision-post.sh') then
+  if File.exists?(File.join(vagrant_dir,'provision','provision-post.sh')) then
     config.vm.provision :shell, :path => File.join( "provision", "provision-post.sh" )
   end
 end

@@ -154,8 +154,8 @@ then
 		gpg -q --keyserver keyserver.ubuntu.com --recv-key A1715D88E1DF1F24
 		gpg -q -a --export A1715D88E1DF1F24 | apt-key add -
 
-		# Launchpad nodejs key C7917B12 
-		gpg -q --keyserver keyserver.ubuntu.com --recv-key C7917B12 
+		# Launchpad nodejs key C7917B12
+		gpg -q --keyserver keyserver.ubuntu.com --recv-key C7917B12
 		gpg -q -a --export  C7917B12  | apt-key add -
 
 		# update all of the package references before installing anything
@@ -227,13 +227,13 @@ then
 	#
 	# Install or Update Grunt based on gurrent state.  Updates are direct
 	# from NPM
-	if [ ! -d /usr/lib/node_modules/grunt-cli  ]
+	if grunt --version ;
 	then
-		echo "Installing Grunt CLI"
-		npm install -g grunt-cli
-	else
 		echo "Updating Grunt CLI"
 		npm update -g grunt-cli
+	else
+		echo "Installing Grunt CLI"
+		npm install -g grunt-cli
 	fi
 
 else
@@ -363,9 +363,6 @@ then
 	then
 		echo -e "\nDownloading webgrind, see https://github.com/jokkedk/webgrind"
 		git clone git://github.com/jokkedk/webgrind.git /srv/www/default/webgrind
-
-		echo -e "\nLinking webgrind config file..."
-		ln -sf /srv/config/webgrind-config.php /srv/www/default/webgrind/config.php | echo " * /srv/config/webgrind-config.php -> /srv/www/default/webgrind/config.php"
 	else
 		echo -e "\nUpdating webgrind..."
 		cd /srv/www/default/webgrind
@@ -421,7 +418,7 @@ PHP
 define( 'WP_DEBUG', true );
 PHP
 		wp core install --url=src.wordpress-develop.dev --quiet --title="WordPress Develop" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
-		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/tests/
+		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/
 	else
 		echo "Updating WordPress trunk..."
 		cd /srv/www/wordpress-develop/
@@ -436,24 +433,29 @@ PHP
 		grunt
 	fi
 
-	# Download phpMyAdmin 4.0.3
+	# Download phpMyAdmin 4.0.5
 	if [ ! -d /srv/www/default/database-admin ]
 	then
-		echo "Downloading phpMyAdmin 4.0.3..."
+		echo "Downloading phpMyAdmin 4.0.5..."
 		cd /srv/www/default
-		wget -q -O phpmyadmin.tar.gz 'http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-english.tar.gz/download#!md5!07dc6ed4d65488661d2581de8d325493'
+		wget -q -O phpmyadmin.tar.gz 'http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.0.5/phpMyAdmin-4.0.5-english.tar.gz/download'
 		tar -xf phpmyadmin.tar.gz
-		mv phpMyAdmin-4.0.3-english database-admin
+		mv phpMyAdmin-4.0.5-english database-admin
 		rm phpmyadmin.tar.gz
 	else
-		echo "PHPMyAdmin 4.0.3 already installed."
+		echo "PHPMyAdmin already installed."
 	fi
 else
 	echo -e "\nNo network available, skipping network installations"
 fi
+
 # Add any custom domains to the virtual machine's hosts file so that it
 # is self aware. Enter domains space delimited as shown with the default.
-DOMAINS='local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev'
+DOMAINS='local.wordpress.dev 
+         local.wordpress-trunk.dev
+         src.wordpress-develop.dev
+         build.wordpress-develop.dev'
+
 if ! grep -q "$DOMAINS" /etc/hosts
 then echo "127.0.0.1 $DOMAINS" >> /etc/hosts
 fi
