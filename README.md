@@ -4,7 +4,7 @@ Varying Vagrant Vagrants is an evolving [Vagrant](http://vagrantup.com) configur
 
 * **Version**: 0.9-working
 * **Latest Stable**: [v0.8](https://github.com/10up/varying-vagrant-vagrants/tree/v0.8)
-* **Contributors**: [@jeremyfelt](http://github.com/jeremyfelt), [@carldanley](http://github.com/carldanley), [@ericmann](http://github.com/ericmann), [@lkwdwrd](http://github.com/lkwdwrd), [@TheLastCicada](http://github.com/TheLastCicada), [@tddewey](http://github.com/tddewey), [@johnpbloch](http://github.com/johnpbloch), [@kadamwhite](http://github.com/kadamwhite), [@scribu](http://github.com/scribu), [@danielbachhuber](http://github.com/danielbachhuber), [@tollmanz](http://github.com/tollmanz), [@mbijon](http://github.com/mbijon), [@markjaquith](http://github.com/markjaquith), [@curtismchale](http://github.com/curtismchale), [@Mamaduka](http://github.com/mamaduka), [@lgedeon](http://github.com/lgedeon), [@pmgarman](http://github.com/pmgarman), [@westonruter](http://github.com/westonruter), [@petemall](http://github.com/petemall), [@cmmarslender](http://github.com/cmmarslender), [@mintindeed](http://github.com/mintindeed), [@mboynes](http://github.com/mboynes), [@aaronjorbin](http://github.com/aaronjorbin), [@tobiasbg](http://github.com/tobiasbg), [@ocean90](http://github.com/ocean90)
+* **Contributors**: [@jeremyfelt](http://github.com/jeremyfelt), [@carldanley](http://github.com/carldanley), [@ericmann](http://github.com/ericmann), [@lkwdwrd](http://github.com/lkwdwrd), [@TheLastCicada](http://github.com/TheLastCicada), [@tddewey](http://github.com/tddewey), [@johnpbloch](http://github.com/johnpbloch), [@kadamwhite](http://github.com/kadamwhite), [@scribu](http://github.com/scribu), [@danielbachhuber](http://github.com/danielbachhuber), [@tollmanz](http://github.com/tollmanz), [@mbijon](http://github.com/mbijon), [@markjaquith](http://github.com/markjaquith), [@curtismchale](http://github.com/curtismchale), [@Mamaduka](http://github.com/mamaduka), [@lgedeon](http://github.com/lgedeon), [@pmgarman](http://github.com/pmgarman), [@westonruter](http://github.com/westonruter), [@petemall](http://github.com/petemall), [@cmmarslender](http://github.com/cmmarslender), [@mintindeed](http://github.com/mintindeed), [@mboynes](http://github.com/mboynes), [@aaronjorbin](http://github.com/aaronjorbin), [@tobiasbg](http://github.com/tobiasbg), [@ocean90](http://github.com/ocean90), [@lvnilesh](http://github.com/lvnilesh)
 * **Contributing**: Contributions are more than welcome. Please submit pull requests against the [master branch](https://github.com/10up/varying-vagrant-vagrants/). Thanks!
 
 ## Overview
@@ -54,7 +54,7 @@ Immediate goals for VVV include:
 1. Start with any operating system.
 1. Install [VirtualBox 4.2.16](https://www.virtualbox.org/wiki/Downloads)
     * VVV (and Vagrant) has been tested with this version. If a newer version appears on the downloads page and you don't feel like being a guinea pig, check out the [older downloads](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) page and download the 4.2.16 release.
-1. Install [Vagrant 1.2.7](http://downloads.vagrantup.com/tags/v1.2.7)
+1. Install [Vagrant 1.3.0](http://downloads.vagrantup.com/tags/v1.3.0)
     * `vagrant` will now be available as a command in the terminal, try it out.
 1. Clone the Varying Vagrant Vagrants repository into a local directory
     * `git clone git://github.com/10up/varying-vagrant-vagrants.git vagrant-local`
@@ -68,11 +68,11 @@ Immediate goals for VVV include:
     * `192.168.50.4  local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev`
     * On -nix systems you can use: (note that location of host file after the >> may vary) `sudo sh -c 'echo "192.168.50.4 local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev" >>/private/etc/hosts'`
 1. Visit any of the following default sites in your browser:
-    * `http://local.wordpress.dev/` for WordPress stable
-    * `http://local.wordpress-trunk.dev/` for WordPress trunk
-    * `http://src.wordpress-develop.dev/` for trunk WordPress development files
-    * `http://build.wordpress-develop.dev/` for version of those development files built with Grunt
-    * `http://192.168.50.4` for a default dashboard containing several useful tools
+    * [http://local.wordpress.dev](http://local.wordpress.dev/) for WordPress stable
+    * [http://local.wordpress-trunk.dev](http://local.wordpress-trunk.dev/) for WordPress trunk
+    * [http://src.wordpress-develop.dev](http://src.wordpress-develop.dev/) for trunk WordPress development files
+    * [http://build.wordpress-develop.dev](http://build.wordpress-develop.dev/) for version of those development files built with Grunt
+    * [http://192.168.50.4](http://192.168.50.4) for a default dashboard containing several useful tools
 
 Fancy, yeah?
 

@@ -301,11 +301,11 @@ vvv_ip=`ifconfig eth1 | ack "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1`
 # Make sure the services we expect to be running are running.
 echo -e "\nRestart services..."
 service nginx restart
-service php5-fpm restart
 service memcached restart
 
 # Disable PHP Xdebug module by default
 php5dismod xdebug
+service php5-fpm restart
 
 # MySQL gives us an error if we restart a non running service, which
 # happens after a `vagrant halt`. Check to see if it's running before
@@ -357,15 +357,26 @@ then
 	# Link `wp` to the `/usr/local/bin` directory
 	ln -sf /srv/www/wp-cli/bin/wp /usr/local/bin/wp
 
+	# Download and extract phpMemcachedAdmin to provide a dashboard view and admin interface
+	# to the goings on of memcached when running
+	if [ ! -d /srv/www/default/memcached-admin ]
+	then
+		echo -e "\nDownloading phpMemcachedAdmin, see https://code.google.com/p/phpmemcacheadmin/"
+		cd /srv/www/default
+		wget -q -O phpmemcachedadmin.tar.gz 'https://phpmemcacheadmin.googlecode.com/files/phpMemcachedAdmin-1.2.2-r262.tar.gz'
+		mkdir memcached-admin
+		tar -xf phpmemcachedadmin.tar.gz --directory memcached-admin
+		rm phpmemcachedadmin.tar.gz
+	else
+		echo "phpMemcachedAdmin already installed."
+	fi
+
 	# Webgrind install (for viewing callgrind/cachegrind files produced by
 	# xdebug profiler)
 	if [ ! -d /srv/www/default/webgrind ]
 	then
 		echo -e "\nDownloading webgrind, see https://github.com/jokkedk/webgrind"
 		git clone git://github.com/jokkedk/webgrind.git /srv/www/default/webgrind
-
-		echo -e "\nLinking webgrind config file..."
-		ln -sf /srv/config/webgrind-config.php /srv/www/default/webgrind/config.php | echo " * /srv/config/webgrind-config.php -> /srv/www/default/webgrind/config.php"
 	else
 		echo -e "\nUpdating webgrind..."
 		cd /srv/www/default/webgrind
@@ -421,7 +432,7 @@ PHP
 define( 'WP_DEBUG', true );
 PHP
 		wp core install --url=src.wordpress-develop.dev --quiet --title="WordPress Develop" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
-		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/tests/
+		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/
 	else
 		echo "Updating WordPress trunk..."
 		cd /srv/www/wordpress-develop/
@@ -451,9 +462,14 @@ PHP
 else
 	echo -e "\nNo network available, skipping network installations"
 fi
+
 # Add any custom domains to the virtual machine's hosts file so that it
 # is self aware. Enter domains space delimited as shown with the default.
-DOMAINS='local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev'
+DOMAINS='local.wordpress.dev 
+         local.wordpress-trunk.dev
+         src.wordpress-develop.dev
+         build.wordpress-develop.dev'
+
 if ! grep -q "$DOMAINS" /etc/hosts
 then echo "127.0.0.1 $DOMAINS" >> /etc/hosts
 fi
