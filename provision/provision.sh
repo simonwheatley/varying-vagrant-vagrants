@@ -119,10 +119,9 @@ done
 #
 # Use debconf-set-selections to specify the default password for the root MySQL
 # account. This runs on every provision, even if MySQL has been installed. If
-# MySQL is already installed, it will not affect anything. The password in the
-# following two lines *is* actually set to the word 'blank' for the root user.
-echo mysql-server mysql-server/root_password password blank | debconf-set-selections
-echo mysql-server mysql-server/root_password_again password blank | debconf-set-selections
+# MySQL is already installed, it will not affect anything. 
+echo mysql-server mysql-server/root_password password root | debconf-set-selections
+echo mysql-server mysql-server/root_password_again password root | debconf-set-selections
 
 # Postfix
 #
@@ -134,7 +133,8 @@ echo postfix postfix/main_mailer_type select Internet Site | debconf-set-selecti
 echo postfix postfix/mailname string vvv | debconf-set-selections
 
 # Provide our custom apt sources before running `apt-get update`
-ln -sf /srv/config/apt-source-append.list /etc/apt/sources.list.d/vvv-sources.list | echo "Linked custom apt sources"
+ln -sf /srv/config/apt-source-append.list /etc/apt/sources.list.d/vvv-sources.list
+echo "Linked custom apt sources"
 
 if [[ $ping_result == *bytes?from* ]]
 then
@@ -240,10 +240,10 @@ then
 	if grunt --version ;
 	then
 		echo "Updating Grunt CLI"
-		npm update -g grunt-cli
+		npm update -g grunt-cli &>/dev/null
 	else
 		echo "Installing Grunt CLI"
-		npm install -g grunt-cli
+		npm install -g grunt-cli &>/dev/null
 	fi
 
 else
@@ -269,39 +269,47 @@ fi
 # SYMLINK HOST FILES
 echo -e "\nSetup configuration file links..."
 
-ln -sf /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf | echo " * /srv/config/nginx-config/nginx.conf -> /etc/nginx/nginx.conf"
-ln -sf /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf | echo " * /srv/config/nginx-config/nginx-wp-common.conf -> /etc/nginx/nginx-wp-common.conf"
+ln -sf /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf 
+echo " * /srv/config/nginx-config/nginx.conf -> /etc/nginx/nginx.conf"
+
+ln -sf /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf
+echo " * /srv/config/nginx-config/nginx-wp-common.conf -> /etc/nginx/nginx-wp-common.conf"
 
 # Configuration for php5-fpm
-ln -sf /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf | echo " * /srv/config/php5-fpm-config/www.conf -> /etc/php5/fpm/pool.d/www.conf"
+ln -sf /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf
+echo " * /srv/config/php5-fpm-config/www.conf -> /etc/php5/fpm/pool.d/www.conf"
 
 # Provide additional directives for PHP in a custom ini file
-ln -sf /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini | echo " * /srv/config/php5-fpm-config/php-custom.ini -> /etc/php5/fpm/conf.d/php-custom.ini"
+ln -sf /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini
+echo " * /srv/config/php5-fpm-config/php-custom.ini -> /etc/php5/fpm/conf.d/php-custom.ini"
 
 # Configuration for Xdebug
-ln -sf /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini | echo " * /srv/config/php5-fpm-config/xdebug.ini -> /etc/php5/fpm/conf.d/xdebug.ini"
+ln -sf /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini
+echo " * /srv/config/php5-fpm-config/xdebug.ini -> /etc/php5/fpm/conf.d/xdebug.ini"
 
 # Configuration for APC
-ln -sf /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini | echo " * /srv/config/php5-fpm-config/apc.ini -> /etc/php5/fpm/conf.d/apc.ini"
-
-# Configuration for mysql
-cp /srv/config/mysql-config/my.cnf /etc/mysql/my.cnf | echo " * /srv/config/mysql-config/my.cnf -> /etc/mysql/my.cnf"
-ln -sf /srv/config/mysql-config/user-my.cnf /home/vagrant/.my.cnf | echo " * /srv/config/mysql-config/user-my.cnf -> /home/vagrant/.my.cnf"
+ln -sf /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini
+echo " * /srv/config/php5-fpm-config/apc.ini -> /etc/php5/fpm/conf.d/apc.ini"
 
 # Configuration for memcached
-ln -sf /srv/config/memcached-config/memcached.conf /etc/memcached.conf | echo " * /srv/config/memcached-config/memcached.conf -> /etc/memcached.conf"
+ln -sf /srv/config/memcached-config/memcached.conf /etc/memcached.conf
+echo " * /srv/config/memcached-config/memcached.conf -> /etc/memcached.conf"
 
 # Custom bash_profile for our vagrant user
-ln -sf /srv/config/bash_profile /home/vagrant/.bash_profile | echo " * /srv/config/bash_profile -> /home/vagrant/.bash_profile"
+ln -sf /srv/config/bash_profile /home/vagrant/.bash_profile
+echo " * /srv/config/bash_profile -> /home/vagrant/.bash_profile"
 
 # Custom bash_aliases included by vagrant user's .bashrc
-ln -sf /srv/config/bash_aliases /home/vagrant/.bash_aliases | echo " * /srv/config/bash_aleases -> /home/vagrant/.bash_aliases"
+ln -sf /srv/config/bash_aliases /home/vagrant/.bash_aliases
+echo " * /srv/config/bash_aliases -> /home/vagrant/.bash_aliases"
 
 # Custom home bin directory
-ln -nsf /srv/config/homebin /home/vagrant/bin | echo " * /srv/config/homebin -> /home/vagrant/bin"
+ln -nsf /srv/config/homebin /home/vagrant/bin
+echo " * /srv/config/homebin -> /home/vagrant/bin"
 
 # Custom vim configuration via .vimrc
-ln -sf /srv/config/vimrc /home/vagrant/.vimrc | echo " * /srv/config/vimrc -> /home/vagrant/.vimrc"
+ln -sf /srv/config/vimrc /home/vagrant/.vimrc
+echo " * /srv/config/vimrc -> /home/vagrant/.vimrc"
 
 # Capture the current IP address of the virtual machine into a variable that
 # can be used when necessary throughout provisioning.
@@ -318,37 +326,52 @@ service memcached restart
 php5dismod xdebug
 service php5-fpm restart
 
-# MySQL gives us an error if we restart a non running service, which
-# happens after a `vagrant halt`. Check to see if it's running before
-# deciding whether to start or restart.
-exists_mysql=`service mysql status`
-if [ "mysql stop/waiting" == "$exists_mysql" ]
+# If MySQL is installed, go through the various imports and service tasks.
+if mysql --version &>/dev/null
 then
-	echo "service mysql start"
-	service mysql start
+	echo -e "\nSetup MySQL configuration file links..."
+	# Configuration for MySQL
+	cp /srv/config/mysql-config/my.cnf /etc/mysql/my.cnf 
+	echo " * /srv/config/mysql-config/my.cnf -> /etc/mysql/my.cnf"
+	ln -sf /srv/config/mysql-config/root-my.cnf /home/vagrant/.my.cnf
+	echo " * /srv/config/mysql-config/root-my.cnf -> /home/vagrant/.my.cnf"
+
+	# MySQL gives us an error if we restart a non running service, which
+	# happens after a `vagrant halt`. Check to see if it's running before
+	# deciding whether to start or restart.
+	exists_mysql=`service mysql status`
+	if [ "mysql stop/waiting" == "$exists_mysql" ]
+	then
+		echo "service mysql start"
+		service mysql start
+	else
+		echo "service mysql restart"
+		service mysql restart
+	fi
+
+	# IMPORT SQL
+	#
+	# Create the databases (unique to system) that will be imported with
+	# the mysqldump files located in database/backups/
+	if [ -f /srv/database/init-custom.sql ]
+	then
+		mysql -u root -proot < /srv/database/init-custom.sql
+		echo -e "\nInitial custom MySQL scripting..."
+	else
+		echo -e "\nNo custom MySQL scripting found in database/init-custom.sql, skipping..."
+	fi
+
+	# Setup MySQL by importing an init file that creates necessary
+	# users and databases that our vagrant setup relies on.
+	mysql -u root -proot < /srv/database/init.sql
+	echo "Initial MySQL prep..."
+
+	# Process each mysqldump SQL file in database/backups to import
+	# an initial data set for MySQL.
+	/srv/database/import-sql.sh
 else
-	echo "service mysql restart"
-	service mysql restart
+	echo -e "\nMySQL is not installed. No databases imported."
 fi
-
-# IMPORT SQL
-#
-# Create the databases (unique to system) that will be imported with
-# the mysqldump files located in database/backups/
-if [ -f /srv/database/init-custom.sql ]
-then
-	mysql -u root -pblank < /srv/database/init-custom.sql | echo -e "\nInitial custom MySQL scripting..."
-else
-	echo -e "\nNo custom MySQL scripting found in database/init-custom.sql, skipping..."
-fi
-
-# Setup MySQL by importing an init file that creates necessary
-# users and databases that our vagrant setup relies on.
-mysql -u root -pblank < /srv/database/init.sql | echo "Initial MySQL prep..."
-
-# Process each mysqldump SQL file in database/backups to import
-# an initial data set for MySQL.
-/srv/database/import-sql.sh
 
 if [[ $ping_result == *bytes?from* ]]
 then
@@ -391,6 +414,28 @@ then
 	else
 		echo -e "\nUpdating webgrind..."
 		cd /srv/www/default/webgrind
+		git pull --rebase origin master
+	fi
+
+	# PHP_CodeSniffer (for running WordPress-Coding-Standards)
+	if [ ! -d /srv/www/phpcs ]
+	then
+		echo -e "\nDownloading PHP_CodeSniffer (phpcs), see https://github.com/squizlabs/PHP_CodeSniffer"
+		git clone git://github.com/squizlabs/PHP_CodeSniffer.git /srv/www/phpcs
+	else
+		echo -e "\nUpdating PHP_CodeSniffer (phpcs)..."
+		cd /srv/www/phpcs
+		git pull --rebase origin master
+	fi
+
+	# Sniffs WordPress Coding Standards
+	if [ ! -d /srv/www/phpcs/CodeSniffer/Standards/WordPress ]
+	then
+		echo -e "\nDownloading WordPress-Coding-Standards, snifs for PHP_CodeSniffer, see https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards"
+		git clone git://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git /srv/www/phpcs/CodeSniffer/Standards/WordPress
+	else
+		echo -e "\nUpdating PHP_CodeSniffer..."
+		cd /srv/www/phpcs/CodeSniffer/Standards/WordPress
 		git pull --rebase origin master
 	fi
 
@@ -444,28 +489,30 @@ define( 'WP_DEBUG', true );
 PHP
 		wp core install --url=src.wordpress-develop.dev --quiet --title="WordPress Develop" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
 		cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/
+		cd /srv/www/wordpress-develop/
+		npm install &>/dev/null
 	else
 		echo "Updating WordPress trunk..."
 		cd /srv/www/wordpress-develop/
 		svn up
+		npm install &>/dev/null
 	fi
 
 	if [ ! -d /srv/www/wordpress-develop/build ]
 	then
-		echo "Initializing grunt in WordPress develop..."
+		echo "Initializing grunt in WordPress develop... This may take a few moments."
 		cd /srv/www/wordpress-develop/
-		npm install
 		grunt
 	fi
 
-	# Download phpMyAdmin 4.0.5
+	# Download phpMyAdmin 4.0.8
 	if [ ! -d /srv/www/default/database-admin ]
 	then
-		echo "Downloading phpMyAdmin 4.0.5..."
+		echo "Downloading phpMyAdmin 4.0.8..."
 		cd /srv/www/default
-		wget -q -O phpmyadmin.tar.gz 'http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.0.5/phpMyAdmin-4.0.5-english.tar.gz/download'
+		wget -q -O phpmyadmin.tar.gz 'http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.0.8/phpMyAdmin-4.0.8-english.tar.gz/download'
 		tar -xf phpmyadmin.tar.gz
-		mv phpMyAdmin-4.0.5-english database-admin
+		mv phpMyAdmin-4.0.8-english database-admin
 		rm phpmyadmin.tar.gz
 	else
 		echo "PHPMyAdmin already installed."
@@ -474,18 +521,29 @@ else
 	echo -e "\nNo network available, skipping network installations"
 fi
 
-# Add any custom domains to the virtual machine's hosts file so that it
-# is self aware. Enter domains space delimited as shown with the default.
-DOMAINS='local.wordpress.dev 
-         local.wordpress-trunk.dev
-         src.wordpress-develop.dev
-         build.wordpress-develop.dev'
-
-if ! grep -q "$DOMAINS" /etc/hosts
-then
-	DOMAINS=$(echo $DOMAINS)
-	echo "127.0.0.1 $DOMAINS" >> /etc/hosts
-fi
+# Parse any vvv-hosts file located in www/ or subdirectories of www/
+# for domains to be added to the virtual machine's host file so that it is
+# self aware.
+#
+# Domains should be entered on new lines.
+echo "Cleaning the virtual machine's /etc/hosts file..."
+sed -n '/# vvv-auto$/!p' /etc/hosts > /etc/hosts
+echo "Adding domains to the virtual machine's /etc/hosts file..."
+find /srv/www/ -maxdepth 4 -name 'vvv-hosts' | \
+while read hostfile
+do
+	while IFS='' read -r line || [ -n "$line" ]
+	do
+		if [ "#" != ${line:0:1} ]
+		then
+			if ! grep -q "^127.0.0.1 $line$" /etc/hosts
+			then
+				echo "127.0.0.1 $line # vvv-auto" >> /etc/hosts
+				echo " * Added $line from $hostfile"
+			fi
+		fi
+	done < $hostfile
+done
 
 end_seconds=`date +%s`
 echo "-----------------------------"
@@ -496,4 +554,4 @@ then
 else
 	echo "No external network available. Package installation and maintenance skipped."
 fi
-echo "For further setup instructions, visit http://$vvv_ip"
+echo "For further setup instructions, visit http://vvv.dev"

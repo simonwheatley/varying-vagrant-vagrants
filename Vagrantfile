@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "precise32"
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
-  config.vm.hostname = "vvv"
+  config.vm.hostname = "vvv.dev"
 
   # Local Machine Hosts
   #
@@ -38,15 +38,36 @@ Vagrant.configure("2") do |config|
   # be aware of the domains specified below. Watch the provisioning script as you may be
   # required to enter a password for Vagrant to access your hosts file.
   #
-  # By default, we'll include the domains setup by VVV. A short term goal is to read these in
-  # from a local config file so that they can be more dynamic to your setup.
+  # By default, we'll include the domains setup by VVV through the vvv-hosts file
+  # located in the www/ directory.
+  #
+  # Other domains can be automatically added by including a vvv-hosts file containing
+  # individual domains separated by whitespace in subdirectories of www/.
   if defined? VagrantPlugins::HostsUpdater
-    config.hostsupdater.aliases = [
-      "local.wordpress.dev",
-      "local.wordpress-trunk.dev",
-      "src.wordpress-develop.dev",
-      "build.wordpress-develop.dev"
-    ]
+
+    # Capture the paths to all vvv-hosts files under the www/ directory.
+    paths = []
+    Dir.glob(vagrant_dir + '/www/**/vvv-hosts').each do |path|
+      paths << path
+    end
+
+    # Parse through the vvv-hosts files in each of the found paths and put the hosts
+    # that are found into a single array.
+    hosts = []
+    paths.each do |path|
+      new_hosts = []
+      file_hosts = IO.read(path).split( "\n" )
+      file_hosts.each do |line|
+        if line[0..0] != "#"
+          new_hosts << line
+        end
+      end
+      hosts.concat new_hosts
+    end
+
+    # Pass the final hosts array to the hostsupdate plugin so it can perform magic.
+    config.hostsupdater.aliases = hosts
+
   end
 
   # Default Box IP Address
@@ -62,7 +83,7 @@ Vagrant.configure("2") do |config|
 
   # Drive mapping
   #
-  # The following config.vm.share_folder settings will map directories in your Vagrant
+  # The following config.vm.synced_folder settings will map directories in your Vagrant
   # virtual machine to directories on your local machine. Once these are mapped, any
   # changes made to the files in these directories will affect both the local and virtual
   # machine versions. Think of it as two different ways to access the same file. When the
@@ -79,7 +100,7 @@ Vagrant.configure("2") do |config|
   if vagrant_version >= "1.3.0"
     config.vm.synced_folder "database/data/", "/var/lib/mysql", :mount_options => [ "dmode=777", "fmode=777" ]
   else
-    config.vm.synced_folder "database/data/", "/var/lib/mysql", :extra => [ "dmode=777", "fmode=777" ]
+    config.vm.synced_folder "database/data/", "/var/lib/mysql", :extra => 'dmode=777,fmode=777'
   end
 
   # /srv/config/
@@ -105,7 +126,7 @@ Vagrant.configure("2") do |config|
   if vagrant_version >= "1.3.0"
     config.vm.synced_folder "www/", "/srv/www/", :owner => "www-data", :mount_options => [ "dmode=775", "fmode=774" ]
   else
-    config.vm.synced_folder "www/", "/srv/www/", :owner => "www-data", :extra => [ "dmode=775", "fmode=774" ]
+    config.vm.synced_folder "www/", "/srv/www/", :owner => "www-data", :extra => 'dmode=775,fmode=774'
   end
 
   # Customfile - POSSIBLY UNSTABLE
@@ -141,6 +162,11 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell, :path => File.join( "provision", "provision-custom.sh" )
   else
     config.vm.provision :shell, :path => File.join( "provision", "provision.sh" )
+  end
+
+  # auto-site-setup.sh iterates through all sites requiring setup, and sets them up.
+  if File.exists?(File.join(vagrant_dir,'provision','auto-site-setup.sh')) then
+    config.vm.provision :shell, :path => File.join( "provision", "auto-site-setup.sh" )
   end
 
   # provision-post.sh acts as a post-hook to the default provisioning. Anything that should
