@@ -1,7 +1,41 @@
 # Varying Vagrant Vagrants Changelog
 
-## 0.8-working
+## 0.9
+* **Possible Annoying:** Use `precise32` for the Vagrant box name for better cross project box caching.
+    * **Note:** This will probably cause a new Vagrant box to download. Use `vagrant box remove std-precise32` after a `vagrant destroy` to remove the old one and start with this.
+* **Possible Breaking:** Change VM hostname to `vvv.dev`
+    * **Note:** If you had anything setup to rely on the hostname of precise32-dev, this may break.
+* **Possible Breaking:** Change MySQL root password to `root`
+	* **Note:** If anything is setup to rely on the previous password of `blank`, this  may break.
+	* You can also now access `mysql -u root` without a password.
+* **Introduce** support for the WordPress develop.svn
+	* This was added pretty much the day it was available. Such a pleasure to work with!
+	* Allowed us to remove the old `wordpress-unit-tests` in favor of the new `wordpress-develop/tests`
+* **Introduce** support for the Vagrant hostsupdater plugin
+	* Use `vagrant plugin install vagrant-hostsupdater` to install.
+	* Very, very much recommended for an easier and happier life.
+* **Introduce** Postfix with a default config. Mail works! (But check your spam)
+* **Introduce** the WordPress i18n Tools, including `config/homebin/makepot`
+* **Introduce** PHP_CodeSniffer, WordPress-Coding-Standards, and Webgrind
+* **Remove** entire well intended but not so useful flags system
+* Rather than include PHPMemcachedadmin in the VVV repository, download it on initial provision
+* Verify support for Vagrant 1.3.5 (as well as 1.2.x) and Virtualbox 4.3 (as well as 4.2.x)
+* Move `xdebug_on` and `xdebug_off` controls to executable files in `config/homebin`
+* Generate `vagrant_dir` in `Vagrantfile` for accessing relative file locations
+* Add a basic network connectivity check by pinging Google DNS servers
+* Update stable version of WordPress automatically on provision
+* General cleanup to screen output during provisioning
+* Many updates to the default nginx configuration
+* Remove poor, unused implementation of Watchr
+* Provide default certs for SSL in Nginx
 
+## 0.8
+* Enable SSH agent forwarding
+* Wrap update/installation procedures with a network status check
+* Enable WP_DEBUG by default
+* Update wp-cli during provisioning
+* Better handling of package status checks
+* Better handling of custom apt sources
 * Add PHPMemcachedAdmin 1.2.2 to repository for memcached stats viewing.
 * Add phpMyAdmin 4.0.3 to repository for database management
 
