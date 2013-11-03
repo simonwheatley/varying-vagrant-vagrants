@@ -311,6 +311,14 @@ echo " * /srv/config/homebin -> /home/vagrant/bin"
 ln -sf /srv/config/vimrc /home/vagrant/.vimrc
 echo " * /srv/config/vimrc -> /home/vagrant/.vimrc"
 
+# Import the Charles CA Certificate, to allow SSL proxying 
+# through Charles so we can inspect network traffic
+cp /srv/config/charles-proxy-ssl-proxying-certificate.crt /usr/local/share/ca-certificates
+echo " * /srv/config/charles-proxy-ssl-proxying-certificate.crt -> /usr/local/share/ca-certificates"
+
+echo "\nAdding the Charles Proxy SSL certificate"
+update-ca-certificates
+
 # Capture the current IP address of the virtual machine into a variable that
 # can be used when necessary throughout provisioning.
 vvv_ip=`ifconfig eth1 | ack "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1`
