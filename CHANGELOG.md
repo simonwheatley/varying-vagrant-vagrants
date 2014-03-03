@@ -1,5 +1,23 @@
 # Varying Vagrant Vagrants Changelog
 
+## 1.1
+* Transition to [Varying Vagrant Vagrants organization](https://github.com/Varying-Vagrant-Vagrants).
+* Add a CONTRIBUTING document.
+* Add `--allow-root` to all `wp-cli` calls in VVV core.
+* Use a new global composer configuration.
+* Add `zip` as a package during provisioning.
+* Introduce a helpful caveats section.
+* Remove `tcp_nodelay` config in Nginx. Reasoning in 0cce79501.
+
+## 1.0
+* **Introduce** [Auto Site Setup](https://github.com/varying-vagrant-vagrants/VVV/wiki/Auto-site-Setup) during provisioning to allow for easy new project configuration.
+* **Happy Fix** `vagrant up` after halt meets expectations and no longer requires provisioning to be reapplied.
+* Begin implementing best practices from Google's [shell style guide](http://google-styleguide.googlecode.com/svn/trunk/shell.xml) in our provisioning scripts.
+* Databases can now be dropped in phpMyAdmin. Pro-tip, `drop database wordpress_develop` in phpMyAdmin followed by `vagrant provision` clears your src.wordpress-develop.dev for reinstall.
+* Copy config files instead of linking them. This allows for a nicer `vagrant up` after a `vagrant halt` and treats provisioning more like it should be treated. See [1fbf329](https://github.com/varying-vagrant-vagrants/VVV/commit/1fbf32926e69b852d912047da1bfa7c302693b82) for a more detailed commit message.
+* Allow for `dashboard-custom.php` to override the default dashboard provided by VVV
+* Reduce size of the included `my.cnf` file to exclude unrequired changes. Increase `max_allowed_packet` setting.
+
 ## 0.9
 * **Possible Annoying:** Use `precise32` for the Vagrant box name for better cross project box caching.
     * **Note:** This will probably cause a new Vagrant box to download. Use `vagrant box remove std-precise32` after a `vagrant destroy` to remove the old one and start with this.
@@ -19,7 +37,7 @@
 * **Introduce** PHP_CodeSniffer, WordPress-Coding-Standards, and Webgrind
 * **Remove** entire well intended but not so useful flags system
 * Rather than include PHPMemcachedadmin in the VVV repository, download it on initial provision
-* Verify support for Vagrant 1.3.5 (as well as 1.2.x) and Virtualbox 4.3 (as well as 4.2.x)
+* Verify support for Vagrant 1.3.5 (as well as 1.2.x) and VirtualBox 4.3 (as well as 4.2.x)
 * Move `xdebug_on` and `xdebug_off` controls to executable files in `config/homebin`
 * Generate `vagrant_dir` in `Vagrantfile` for accessing relative file locations
 * Add a basic network connectivity check by pinging Google DNS servers
