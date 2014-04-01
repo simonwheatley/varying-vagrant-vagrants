@@ -230,7 +230,7 @@ if [ ! -d /etc/apache2/custom-sites/ ]; then
 	mkdir -p /etc/apache2/custom-sites/
 fi
 # Copy Apache configuration from local
-cp /srv/config/apache2-config/apache2.conf /etc/apache2/sites-enabled/vvv.conf
+cp /srv/config/apache2-config/vvv.conf /etc/apache2/conf.d/vvv.conf
 cp /srv/config/apache2-config/sites/default.conf /etc/apache2/sites-enabled/wp-default.conf
 cp /srv/config/apache2-config/apache2-wp-common.conf /etc/apache2/apache2-wp-common.conf
 if [[ ! -d /etc/apache/custom-sites ]]; then
@@ -238,7 +238,7 @@ if [[ ! -d /etc/apache/custom-sites ]]; then
 fi
 rsync -rvzh --delete /srv/config/apache2-config/sites/ /etc/apache2/custom-sites/
 
-echo " * /srv/config/apache2-config/apache2.conf           -> /etc/apache2/sites-enabled/vvv.conf"
+echo " * /srv/config/apache2-config/vvv.conf               -> /etc/apache2/conf.d/vvv.conf"
 echo " * /srv/config/apache2-config/apache2-wp-common.conf -> /etc/apache2/sites-enabled/wp-default.conf"
 echo " * /srv/config/apache2-config/sites/*                -> /etc/apache/custom-sites/"
 
