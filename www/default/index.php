@@ -21,9 +21,10 @@ if ( file_exists( 'dashboard-custom.php' ) ) {
 <h1>Varying Vagrant Vagrants (Apache) Dashboard</h1>
 <ul class="nav">
 	<li class="active"><a href="#">Home</a></li>
-	<li><a href="http://github.com/10up/varying-vagrant-vagrants">Repository</a></li>
+	<li><a href="https://github.com/varying-vagrant-vagrants/vvv/">Repository</a></li>
 	<li><a href="database-admin/">phpMyAdmin</a></li>
 	<li><a href="memcached-admin/">phpMemcachedAdmin</a></li>
+	<li><a href="opcache-status/opcache.php">Opcache Status</a></li>
 	<li><a href="webgrind/">Webgrind</a></li>
 	<li><a href="phpinfo/">PHP Info</a></li>
 </ul>
