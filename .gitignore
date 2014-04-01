@@ -15,7 +15,6 @@
 /provision/provision-post.sh
 
 # No need to share individual site configs with each other
-/config/nginx-config/sites/*.conf
 /config/apache2-config/sites/*.conf
 
 # Ignore anything in the 'custom' directory in config
@@ -33,8 +32,7 @@
 
 # BUT....
 
-# We do have some default nginx configs that should be included
-!/config/nginx-config/sites/default.conf
+# We do have some default Apache configs that should be included
 !/config/apache2-config/sites/default.conf
 
 # And we do have a default SQL file that should be included

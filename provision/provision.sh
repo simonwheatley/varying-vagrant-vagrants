@@ -40,7 +40,7 @@ apt_package_check_list=(
 
 	# PHP5
 	#
-	# Our base packages for php5. As long as php5-fpm and php5-cli are
+	# Our base packages for php5. As long as the Apache lib and php5-cli are
 	# installed, there is no need to install the general php5 package, which
 	# can sometimes install apache as a requirement.
 	libapache2-mod-php5
@@ -534,13 +534,13 @@ done
 for SITE_CONFIG_FILE in $(find /srv/www -maxdepth 5 -name 'vvv-apache.conf'); do
 	DEST_CONFIG_FILE=${SITE_CONFIG_FILE//\/srv\/www\//}
 	DEST_CONFIG_FILE=${DEST_CONFIG_FILE//\//\-}
-	DEST_CONFIG_FILE=${DEST_CONFIG_FILE/%-vvv-nginx.conf/}
+	DEST_CONFIG_FILE=${DEST_CONFIG_FILE/%-vvv-apache.conf/}
 	DEST_CONFIG_FILE="vvv-auto-$DEST_CONFIG_FILE-$(md5sum <<< $SITE_CONFIG_FILE | cut -c1-32).conf"
 	# We allow the replacement of the {vvv_path_to_folder} token with
 	# whatever you want, allowing flexible placement of the site folder
 	# while still having an Nginx config which works.
 	DIR="$(dirname $SITE_CONFIG_FILE)"
-	sed "s#{vvv_path_to_folder}#$DIR#" $SITE_CONFIG_FILE > /etc/nginx/custom-sites/$DEST_CONFIG_FILE
+	sed "s#{vvv_path_to_folder}#$DIR#" $SITE_CONFIG_FILE > /etc/apache2/custom-sites/$DEST_CONFIG_FILE
 done
 
 # RESTART SERVICES AGAIN
