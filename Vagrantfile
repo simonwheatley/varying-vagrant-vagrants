@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
 		apache.vm.box = "precise32"
 		apache.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
-		apache.vm.hostname = "vvv-apache"
+		apache.vm.hostname = "vvv.apache.dev"
 
 		# Local Machine Hosts
 		#
@@ -75,13 +75,13 @@ Vagrant.configure("2") do |config|
 		# Default Box IP Address
 		#
 		# This is the IP address that your host will communicate to the guest through. In the
-		# case of the default `192.168.50.4` that we've provided, VirtualBox will setup another
+		# case of the default `192.168.50.5` that we've provided, VirtualBox will setup another
 		# network adapter on your host machine with the IP `192.168.50.1` as a gateway.
 		#
 		# If you are already on a network using the 192.168.50.x subnet, this should be changed.
 		# If you are running more than one VM through VirtualBox, different subnets should be used
 		# for those as well. This includes other Vagrant boxes.
-		apache.vm.network :private_network, ip: "192.168.50.4"
+		apache.vm.network :private_network, ip: "192.168.50.5"
 
 		# Drive mapping
 		#

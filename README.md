@@ -111,7 +111,7 @@ Now that you're up and running, start poking around and modifying things.
 
 #### Caveats
 
-The network configuration picks an IP of 192.168.51.4. This works if you are *not* on the 192.168.50.x sub domain, it could cause conflicts on your existing network if you *are* on a 192.168.51.x sub domain already. You can configure any IP address in the `Vagrantfile` and it will be used on the next `vagrant up`
+The network configuration picks an IP of 192.168.50.5. This works if you are *not* on the 192.168.50.x sub domain, it could cause conflicts on your existing network if you *are* on a 192.168.50.x sub domain already. You can configure any IP address in the `Vagrantfile` and it will be used on the next `vagrant up`
 
 ### Credentials and Such
 
