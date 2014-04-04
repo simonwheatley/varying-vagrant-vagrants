@@ -65,21 +65,21 @@ Immediate goals for VVV include:
     * ***Note:*** If VirtualBox 4.3.x is installed, Vagrant 1.3.5 or later is required.
 1. Install the [vagrant-hostsupdater](https://github.com/cogitatio/vagrant-hostsupdater) plugin with `vagrant plugin install vagrant-hostsupdater`
     * Note: This step is not a requirement, though it does make the process of starting up a virtual machine nicer by automating the entries needed in your local machine's `hosts` file to access the provisioned VVV domains in your browser.
-    * If you choose not to install this plugin, a manual entry should be added to your local `hosts` file that looks like this: `192.168.50.4  vvv.dev local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev`
+    * If you choose not to install this plugin, a manual entry should be added to your local `hosts` file that looks like this: `192.168.51.4  vvv.dev local.wordpress.dev local.wordpress-trunk.dev src.wordpress-develop.dev build.wordpress-develop.dev`
 1. Clone or extract the Varying Vagrant Vagrants project into a local directory
     * `git clone git://github.com/Varying-Vagrant-Vagrants/VVV.git vagrant-local`
-    * OR download and extract the repository master [zip file](https://github.com/varying-vagrant-vagrants/vvv/archive/master.zip)
-    * OR grab a [stable release](https://github.com/varying-vagrant-vagrants/vvv/releases) if you'd like some extra comfort.
 1. Change into the new directory with `cd vagrant-local`
+1. Switch to the Apache develop branch
+	* `git checkout feature/apache-develop`
 1. Start the Vagrant environment with `vagrant up`
     * Be patient as the magic happens. This could take a while on the first run as your local machine downloads the required files.
-    * Watch as the script ends, as an administrator or `su` ***password may be required*** to properly modify the hosts file on your local machine.
+    * Watch as the script starts and ends, as an administrator or `su` ***password may be required*** to properly modify the hosts file on your local machine.
 1. Visit any of the following default sites in your browser:
-    * [http://local.wordpress.dev/](http://local.wordpress.dev/) for WordPress stable
-    * [http://local.wordpress-trunk.dev/](http://local.wordpress-trunk.dev/) for WordPress trunk
-    * [http://src.wordpress-develop.dev/](http://src.wordpress-develop.dev/) for trunk WordPress development files
-    * [http://build.wordpress-develop.dev/](http://build.wordpress-develop.dev/) for the version of those development files built with Grunt
-    * [http://vvv.dev/](http://vvv.dev/) for a default dashboard containing several useful tools
+    * [http://local.wordpress.apache.dev/](http://local.wordpress.apache.dev/) for WordPress stable
+    * [http://local.wordpress-trunk.apache.dev/](http://local.wordpress-trunk.apache.dev/) for WordPress trunk
+    * [http://src.wordpress-develop.apache.dev/](http://src.wordpress-develop.apache.dev/) for trunk WordPress development files
+    * [http://build.wordpress-develop.apache.dev/](http://build.wordpress-develop.apache.dev/) for the version of those development files built with Grunt
+    * [http://vvv.apache.dev/](http://vvv.apache.dev/) for a default dashboard containing several useful tools
 
 Fancy, yeah?
 
@@ -111,7 +111,7 @@ Now that you're up and running, start poking around and modifying things.
 
 #### Caveats
 
-The network configuration picks an IP of 192.168.50.4. This works if you are *not* on the 192.168.50.x sub domain, it could cause conflicts on your existing network if you *are* on a 192.168.50.x sub domain already. You can configure any IP address in the `Vagrantfile` and it will be used on the next `vagrant up`
+The network configuration picks an IP of 192.168.51.4. This works if you are *not* on the 192.168.50.x sub domain, it could cause conflicts on your existing network if you *are* on a 192.168.51.x sub domain already. You can configure any IP address in the `Vagrantfile` and it will be used on the next `vagrant up`
 
 ### Credentials and Such
 
