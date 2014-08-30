@@ -3,10 +3,42 @@
 # Create individual SQL files for each database. These files
 # are imported automatically during an initial provision if
 # the databases exist per the import-sql.sh process.
-mysql -e 'show databases' | \
-grep -v -F "information_schema" | \
-grep -v -F "performance_schema" | \
-grep -v -F "mysql" | \
-grep -v -F "test" | \
-grep -v -F "Database" | \
-while read dbname; do mysqldump -uroot "$dbname" > /srv/database/backups/"$dbname".sql && echo "Database $dbname backed up..."; done
+
+declare -A BACKUP_MAP     # Create an associative array
+
+# Find the custom backup locations (files) and create
+# a map of DB names to custom locations
+CUSTOM_DB_BACKUPS=`find /srv/www -maxdepth 5 -name 'vvv-db-*.mysql'`
+for CUSTOM_DB_BACKUP in $CUSTOM_DB_BACKUPS; do
+	DB_NAME=$(basename "$CUSTOM_DB_BACKUP")
+	DB_NAME=${DB_NAME/vvv\-db\-/}
+	DB_NAME=${DB_NAME/\.mysql/}
+	BACKUP_MAP[$DB_NAME]=$CUSTOM_DB_BACKUP 
+done
+
+# Get the DBs we want	
+DB_NAMES=`mysql -e 'show databases' | \
+	grep -v -F "information_schema" | \
+	grep -v -F "performance_schema" | \
+	grep -v -F "mysql" | \
+	grep -v -F "test" | \
+	grep -v -F "Database"`
+# Back up each DB
+for DB_NAME in $DB_NAMES; do
+	STD_LOCATION="/srv/database/backups/$DB_NAME.sql"
+	# Check for a custom backup location
+	# Otherwise back up to the standard location
+	if [ -n "${BACKUP_MAP[$DB_NAME]}" ]; then
+		# echo "Database $DB_NAME backed up to ${BACKUP_MAP[$DB_NAME]}..."
+		mysqldump $DB_NAME > ${BACKUP_MAP[$DB_NAME]} && echo "Database $DB_NAME backed up to ${BACKUP_MAP[$DB_NAME]}..."
+		if [ -f $STD_LOCATION ]; then
+			rm $STD_LOCATION
+		fi
+		# Create a link in the standard location to the custom location
+		ln -s ${BACKUP_MAP[$DB_NAME]} $STD_LOCATION
+	else
+		mysqldump $DB_NAME > $STD_LOCATION && echo "Database $DB_NAME backed up to $STD_LOCATION..."
+	fi
+done
+
+exit 0
