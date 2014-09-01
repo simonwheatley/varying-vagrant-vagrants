@@ -8,6 +8,7 @@ declare -A BACKUP_MAP     # Create an associative array
 
 # Find the custom backup locations (files) and create
 # a map of DB names to custom locations
+# @FIXME: This takes a while, could it be sped up by specifying type?
 CUSTOM_DB_BACKUPS=`find /srv/www -maxdepth 5 -name 'vvv-db-*.mysql'`
 for CUSTOM_DB_BACKUP in $CUSTOM_DB_BACKUPS; do
 	DB_NAME=$(basename "$CUSTOM_DB_BACKUP")
@@ -17,6 +18,7 @@ for CUSTOM_DB_BACKUP in $CUSTOM_DB_BACKUPS; do
 done
 
 # Get the DBs we want	
+# @FIXME: Can we avoid these greps, removing the DBs in some other fashion, for greater neatness and clarity?
 DB_NAMES=`mysql -e 'show databases' | \
 	grep -v -F "information_schema" | \
 	grep -v -F "performance_schema" | \
